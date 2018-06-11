@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -38,8 +40,10 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -65,12 +69,14 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
     @BindView(R.id.outdoors_btn) Button outdoorsBtn;
     @BindView(R.id.sights_btn) Button sightsBtn;
     @BindView(R.id.trending_btn) Button trendingBtn;
+
     @BindView(R.id.current_location_img) ImageView currentLocationImg;
     @BindView(R.id.location_name_txt) TextView locationNameTxt;
     @BindView(R.id.search_location_img) ImageView searchLocationImg;
     @BindView(R.id.detail_recycler_view_explore_fragment) RecyclerView detailsListRecycler;
     @BindView(R.id.fragment_explor_progress_bar) ProgressBar mPBLoading;
 
+    // Items
     private static final String FOOD = "food";
     private static final String DRINKS = "drinks";
     private static final String COFFEE = "coffee";
@@ -79,8 +85,6 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
     private static final String OUTDOORS = "outdoors";
     private static final String SIGHTS = "sights";
     private static final String TRENDING = "trending";
-
-
 
     @Inject
     ExplorePresenter explorePresenter;
@@ -98,8 +102,8 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
     private com.google.android.gms.location.LocationListener listener;
 
     String LOCATION_NAME = null;
-    String LONGITUDE = null;
-    String LATITUDE = null;
+    double LONGITUDE ;
+    double LATITUDE ;
     private static final int RESULT_CANCELED = 323;
 
 
@@ -147,10 +151,15 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
         currentLocationImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (LATITUDE != null && LONGITUDE != null) {
-                    explorePresenter.getCurrentLocationName(LATITUDE, LONGITUDE);
-                    showProgress();
+                Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+                try {
+                    List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE,1);
+                    if (addresses.size() > 0){
+                        LOCATION_NAME = addresses.get(0).getLocality();
+                        locationNameTxt.setText(LOCATION_NAME);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
             }
@@ -161,9 +170,7 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
             @Override
             public void onClick(View view) {
                 try {
-                    Intent intent =
-                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                                    .build(getActivity());
+                    Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN).build(getActivity());
                     startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                 } catch (GooglePlayServicesRepairableException e) {
                     // TODO: Handle the error.
@@ -271,17 +278,6 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
         }
     }
 
-    // get current location name
-    @Override
-    public void showLocationName(String locationName) {
-        LOCATION_NAME = locationName;
-        if (LOCATION_NAME != null){
-            locationNameTxt.setText(LOCATION_NAME);
-        }
-        removeProgress();
-
-    }
-
     @Override
     public void showPlaceInfo(List<Item_> placeInfo) {
         removeProgress();
@@ -301,9 +297,13 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
         TextView countryName = view.findViewById(R.id.country_name);
         TextView contactNumber = view.findViewById(R.id.contact_number);
 
-        String url_1 = imageList.get(0).getPrefix();
-        String url_2 = imageList.get(0).getSuffix();
-        Picasso.get().load(url_1+"300x200"+url_2).placeholder(R.drawable.default_icon).into(imageView);
+        try {
+            String url_1 = imageList.get(0).getPrefix();
+            String url_2 = imageList.get(0).getSuffix();
+            Picasso.get().load(url_1+"300x200"+url_2).placeholder(R.drawable.default_icon).into(imageView);
+        } catch (IndexOutOfBoundsException t){
+            t.getMessage();
+        }
         name.setText(placeDetails.getVenue().getName());
         cityName.setText(placeDetails.getVenue().getLocation().getCity());
         stateName.setText(placeDetails.getVenue().getLocation().getState());
@@ -319,23 +319,24 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
 
         mBuilder.setView(view);
         AlertDialog dialog = mBuilder.create();
+        removeProgress();
         dialog.show();
 
     }
 
     @Override
     public void getImageUser(Item_ placeDetails) {
-        explorePresenter.getImageApiCAll(placeDetails.getVenue().getId());
+        explorePresenter.getImageApiCAll(placeDetails);
         showProgress();
     }
 
     @Override
-    public void showImages(List<ItemImage> images) {
+    public void showImages(List<ItemImage> images, Item_ userInfo) {
         imageList.clear();
         for (int i = 0; i<images.size(); i++){
             imageList.add(images.get(i));
         }
-        removeProgress();
+        getItemClickValue(userInfo);
     }
 
     @Override
@@ -361,8 +362,8 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
         }
         if (mLocation != null) {
 
-            LATITUDE = String.valueOf(mLocation.getLatitude());
-            LONGITUDE = String.valueOf(mLocation.getLongitude());
+            LATITUDE = mLocation.getLatitude();
+            LONGITUDE = mLocation.getLongitude();
 
 
         } else {
@@ -413,7 +414,6 @@ public class FragmentExplore extends Fragment implements ExploreContrect.Views, 
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         // Request location updates
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,

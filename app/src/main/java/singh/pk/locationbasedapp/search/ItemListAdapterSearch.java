@@ -1,7 +1,8 @@
-package singh.pk.locationbasedapp.explore;
+package singh.pk.locationbasedapp.search;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,22 +21,26 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import singh.pk.locationbasedapp.R;
-import singh.pk.locationbasedapp.pojo.Item_;
+import singh.pk.locationbasedapp.search.pojo_search_place.Venue;
 
-public class ItemListAdapterExplore extends RecyclerView.Adapter<ItemListAdapterExplore.ViewHolder> {
+public class ItemListAdapterSearch extends RecyclerView.Adapter<ItemListAdapterSearch.ViewHolder> {
 
-    public List<Item_> placeInfo = new ArrayList<>(0);
-    FragmentExplore fragmentExplore;
+    public List<Venue> placeInfo = new ArrayList<>(0);
+    FragmentSearch fragmentSearch;
 
     @Inject
-    public ItemListAdapterExplore(FragmentExplore fragmentExplore) {
-        this.fragmentExplore = fragmentExplore;
+    public ItemListAdapterSearch(FragmentSearch fragmentSearch) {
+        this.fragmentSearch = fragmentSearch;
     }
 
-    public void updatePlaceInfo(List<Item_> placeInfo){
+    public void updatePlaceInfo(List<Venue> placeInfo){
         this.placeInfo.clear();
         this.placeInfo = placeInfo;
         notifyDataSetChanged();
+    }
+
+    public void searchFromName(List<Venue> placeInfo){
+        this.placeInfo = placeInfo;
     }
 
     @NonNull
@@ -57,37 +62,38 @@ public class ItemListAdapterExplore extends RecyclerView.Adapter<ItemListAdapter
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.place_image) ImageView placeImage;
-        @BindView(R.id.place_name) TextView placeName;
-        @BindView(R.id.item_list_relative_layout) RelativeLayout itemListRelativeLayout;
+        @BindView(R.id.place_image)
+        ImageView placeImage;
+        @BindView(R.id.place_name)
+        TextView placeName;
+        @BindView(R.id.item_list_relative_layout)
+        RelativeLayout itemListRelativeLayout;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
-
         }
 
-        public void bind(final Item_ item, final int position) {
+        public void bind(final Venue item, final int position) {
 
             try {
-                String url_1 = item.getVenue().getCategories().get(0).getIcon().getPrefix();
-                String url_2 = item.getVenue().getCategories().get(0).getIcon().getSuffix();
-                Picasso.get().load(url_1+"88"+url_2).placeholder(R.drawable.default_icon).into(placeImage);
-            } catch (IndexOutOfBoundsException t){
-
+                String url_1 = item.getCategories().get(0).getIcon().getPrefix();
+                String url_2 = item.getCategories().get(0).getIcon().getSuffix();
+                Picasso.get().load(url_1+"64"+url_2).placeholder(R.drawable.default_icon).into(placeImage);
+            } catch (IndexOutOfBoundsException i){
+                Log.i("FragmentSearch :" , i.getMessage());
             }
-            placeName.setText(item.getVenue().getName());
+            placeName.setText(item.getName());
+
             itemListRelativeLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(fragmentExplore.getContext(), ""+position, Toast.LENGTH_SHORT).show();
-
-                    fragmentExplore.getImageUser(item);
+                    Toast.makeText(fragmentSearch.getContext(), ""+position, Toast.LENGTH_SHORT).show();
+                    fragmentSearch.getImageUser(item);
 
                 }
             });
-
         }
     }
 }

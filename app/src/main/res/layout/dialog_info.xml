@@ -9,6 +9,7 @@
         android:id="@+id/user_images"
         android:layout_width="match_parent"
         android:layout_height="250dp"
+        android:src="@drawable/default_icon"
         android:scaleType="centerCrop"/>
 
     <LinearLayout

@@ -20,17 +20,6 @@ public class ExplorePresenter extends BasePresenter implements ExploreContrect.A
         exploreRepository.onAttach(this);
     }
 
-    // get Current Location Name.
-    public void getCurrentLocationName(String latitude, String longitude) {
-        exploreRepository.getLocationName(latitude, longitude);
-    }
-
-
-    @Override
-    public void getLocationName(String locationName) {
-        fragmentExplore.showLocationName(locationName);
-    }
-
     @Override
     public void getPlaceInfo(List<Item_> placeInfo) {
         fragmentExplore.showPlaceInfo(placeInfo);
@@ -42,13 +31,13 @@ public class ExplorePresenter extends BasePresenter implements ExploreContrect.A
     }
 
     @Override
-    public void getImageApiCAll(String userId) {
-        exploreRepository.getUserImageApiCall(userId);
+    public void getImageApiCAll(Item_ placeInfo) {
+        exploreRepository.getUserImageApiCall(placeInfo);
     }
 
     @Override
-    public void getImages(List<ItemImage> images) {
-        fragmentExplore.showImages(images);
+    public void getImages(List<ItemImage> images, Item_ userInfo) {
+        fragmentExplore.showImages(images, userInfo);
     }
 
     @Override

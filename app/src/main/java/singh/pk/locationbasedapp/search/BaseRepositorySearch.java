@@ -1,6 +1,6 @@
-package singh.pk.locationbasedapp.explore;
+package singh.pk.locationbasedapp.search;
 
-public class BaseRepository<T extends BasePresenter> {
+public class BaseRepositorySearch<T extends BasePresenterSearch> {
 
     T actions;
 

@@ -31,14 +31,12 @@ import singh.pk.locationbasedapp.pojo.Item_;
 import singh.pk.locationbasedapp.pojo.NLPResponce;
 import singh.pk.locationbasedapp.pojo_image.ImagePojo;
 import singh.pk.locationbasedapp.pojo_image.ItemImage;
-import singh.pk.locationbasedapp.pojo_location_name.LocationName;
 
 public class ExploreRepository extends BaseRepository<ExplorePresenter>{
 
 
     private static final String BASE_URL = "https://api.foursquare.com/v2/venues/";
-    private static final String SECTION = "section";
-    private static final String AUTH_TOKEN = "RAQPQRL20GP3EDSJPUH2YEZACXQB21OGUZSBP4T24PITASQ0";
+    private static final String AUTH_TOKEN = "************************************";
 
 
 
@@ -46,12 +44,9 @@ public class ExploreRepository extends BaseRepository<ExplorePresenter>{
     Retrofit retrofit;
     ApiCall apiCall;
 
-    ExplorePresenter explorePresenter;
-
     @Inject
     public ExploreRepository(FragmentExplore fragmentExplore) {
     this.fragmentExplore = fragmentExplore;
-//    this.explorePresenter = explorePresenter;
         retrofitInstance();
         apiCall= retrofit.create(ApiCall.class);
 
@@ -103,38 +98,6 @@ public class ExploreRepository extends BaseRepository<ExplorePresenter>{
                 .build();
     }
 
-    // Get location Name
-    public void getLocationName(String latitude, String longitude){
-
-        Call<LocationName> call = apiCall.getLocationName(latitude+","+longitude, AUTH_TOKEN,String.valueOf(20180611));
-        call.enqueue(new Callback<LocationName>() {
-            @Override
-            public void onResponse(Call<LocationName> call, Response<LocationName> response) {
-                if (response.code() == 200) {
-                    LocationName locationName = response.body();
-                    if (locationName != null){
-                        String location = locationName.getResponse().getVenues().get(0).getLocation().getCity();
-                        if (location !=null){
-                            getActions().getLocationName(location);
-                        } else {
-                            getActions().getLocationName(locationName.getResponse().getVenues().get(0).getLocation().getCc());
-                        }
-                    } else {
-                        getActions().getError("Data fetching problem");
-                    }
-                }else {
-                    getActions().getError("No result fetched");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LocationName> call, Throwable t) {
-
-            }
-        });
-
-    }
-
     // food Api hit
     public void getPlaceInfoApiCall(String location, String placeType){
 
@@ -156,16 +119,16 @@ public class ExploreRepository extends BaseRepository<ExplorePresenter>{
 
             @Override
             public void onFailure(Call<NLPResponce> call, Throwable t) {
-
                 Log.e("Explore Repo ::", t.getMessage());
+                getActions().getError(t.getMessage());
             }
         });
     }
 
     // user Image Api Hit
-    public void getUserImageApiCall(String userId){
+    public void getUserImageApiCall(final Item_ userId){
 
-        String url = BASE_URL+userId+"/photos?&oauth_token="+AUTH_TOKEN+"&v=20180610";
+        String url = BASE_URL+userId.getVenue().getId()+"/photos?&oauth_token="+AUTH_TOKEN+"&v=20180610";
         Call<ImagePojo> call = apiCall.getUserImage(url);
         call.enqueue(new Callback<ImagePojo>() {
             @Override
@@ -173,18 +136,20 @@ public class ExploreRepository extends BaseRepository<ExplorePresenter>{
                 if (response.code() == 200){
                  if (response.body() !=null){
                      List<ItemImage> imagePojo = response.body().getResponse().getPhotos().getItems();
-                     getActions().getImages(imagePojo);
+                     getActions().getImages(imagePojo, userId);
                  }else {
-                     getActions().getError("No result fetched");
+                     getActions().getImages(null, userId);
+                     getActions().getError("Image is not able");
                  }
                 } else {
-                    getActions().getError("No result fetched");
+                    getActions().getImages(null, userId);
+                    getActions().getError("Image is not able");
                 }
             }
 
             @Override
             public void onFailure(Call<ImagePojo> call, Throwable t) {
-
+                getActions().getError(t.getMessage());
             }
         });
 

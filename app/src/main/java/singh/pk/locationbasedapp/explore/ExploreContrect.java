@@ -9,15 +9,13 @@ public interface ExploreContrect {
 
     interface Views {
 
-        void showLocationName(String locationName);
-
         void showPlaceInfo(List<Item_> placeInfo);
 
         void getItemClickValue(Item_ placeDetails);
 
         void getImageUser(Item_ placeDetails);
 
-        void showImages(List<ItemImage> images);
+        void showImages(List<ItemImage> images, Item_ userInfo);
 
         void showErrorMessage(String error);
 
@@ -26,15 +24,13 @@ public interface ExploreContrect {
 
     interface Actions {
 
-        void getLocationName(String locationName);
-
         void getPlaceInfo(List<Item_> placeInfo);
 
         void getPlaceInfoApiCall(String location, String placeType);
 
-        void getImageApiCAll(String userId);
+        void getImageApiCAll(Item_ userId);
 
-        void getImages(List<ItemImage> images);
+        void getImages(List<ItemImage> images, Item_ userInfo);
 
         void getError(String error);
     }
