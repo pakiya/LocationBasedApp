@@ -1,0 +1,78 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        applicationId "singh.pk.locationbasedapp"
+        minSdkVersion 21
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        debug{
+            buildConfigField "String", "LOCATION_BASED_APP_BASE_URL", '"https://api.foursquare.com/v2/"'
+        }
+        release {
+            buildConfigField "String", "LOCATION_BASED_APP_BASE_URL", '"https://api.foursquare.com/v2/"'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+ext {
+    playServiceVersion = '15.0.2'
+    retrofitVersion = '2.3.0'
+    daggerVersion = '2.10'
+    butterKnifeVersion = '8.8.1'
+    frescoVersion = '0.14.1'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'com.android.support:design:27.1.1'
+    implementation "com.android.support:support-v4:27.1.1"
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    // Android Libs
+    implementation "com.android.support:appcompat-v7:27.1.1"
+    implementation "com.android.support:design:27.1.1"
+
+    // Image Circle lib
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
+    // Image Crop lib
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.+'
+
+    // Image set libb
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    // Image Compressor lib
+    implementation 'id.zelory:compressor:2.1.0'
+    // Image download offline lib
+    implementation 'com.squareup.okhttp:okhttp:2.5.0'
+
+
+    // DI
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation "com.jakewharton:butterknife:$butterKnifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
+    compileOnly 'javax.annotation:jsr250-api:1.0'
+    implementation 'javax.inject:javax.inject:1'
+
+    // Network
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
+    implementation 'com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.2.0'
+
+
+    implementation 'com.google.android.gms:play-services:11.8.0'
+}
